@@ -1,0 +1,7 @@
+# Windows cmd needs CRLF in batch files and in files it parses
+*.bat        text eol=crlf
+*.cfg        text eol=crlf
+preserve.txt text eol=crlf
+*.md         text eol=lf
+*.py         text eol=lf
+VERSION      text eol=lf
