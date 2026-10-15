@@ -24,6 +24,6 @@ MSYS_NO_PATHCONV=1 cmd /c "$(cygpath -w "$D/fabupdate/scripts/update.bat")" /qui
 | 종료 코드 / 출력 | 사용자에게 |
 |---|---|
 | 0 | `이전 -> 새 버전`과 유지된 파일(`kept ...` 줄)을 요약하고, "Claude Code를 새로 시작하면 적용된다"고 알린다 |
-| 출력에 `[CHECK]` | 사용자가 고친 파일을 새 버전도 바꿨다. 설치된 파일과 `_backup\<날짜-시각>\_new\` 아래 새 버전을 비교해 새 버전에만 있는 변경을 요약하고, 합칠지 묻는다. 합칠 때 사용자가 고친 내용은 지우지 않는다 |
+| 출력에 `[CHECK]` | 사용자가 고친 파일을 새 버전도 바꿨다. 사본은 남지 않으므로 GitHub 원본을 받아 비교한다: `curl -sL https://raw.githubusercontent.com/<REPO>/<BRANCH>/<SUBDIR>/skills/<파일 경로>` (`REPO`, `BRANCH`, `SUBDIR`는 이 스킬 폴더의 `repo.cfg`). 새 버전에만 있는 변경을 요약하고 합칠지 묻는다. 합칠 때 사용자가 고친 내용은 지우지 않는다 |
 | 1 | `[ERROR]` 줄을 그대로 보여 주고 원인을 설명한다. 다운로드 실패면 네트워크나 사내 프록시를 의심하고, `repo.cfg` 주소가 맞는지 확인한다 |
 | 2 | 설치돼 있지 않다. 저장소를 받아 `fab-skills\install.bat`을 실행하거나, 저장소 폴더를 Claude Code로 열고 `/fabinstall`을 쓰라고 안내한다 |

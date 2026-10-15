@@ -4,7 +4,8 @@ setlocal EnableExtensions
 rem ------------------------------------------------------------
 rem  fab-skills uninstaller
 rem  Installed at <skills>\fabuninstall\scripts\uninstall.bat.
-rem  Moves the installed fab skills into <skills>\_backup instead of deleting them.
+rem  Sends the installed fab skills to the Windows Recycle Bin.
+rem  Nothing is left in the skills folder.
 rem  Options: /quiet (no pause at the end)
 rem ------------------------------------------------------------
 
@@ -19,9 +20,8 @@ rem comes back to read this file (it is about to be removed).
 :main
 set "DEST=%FAB_DEST%"
 set "LIST=%DEST%\.fab-skills-list"
-for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "TS=%%i"
-set "BACKUP=%DEST%\_backup\%TS%-uninstalled"
 set "FOUND="
+set "RC=0"
 
 if exist "%LIST%" (
     for /f "usebackq tokens=*" %%S in ("%LIST%") do call :remove "%%S"
@@ -34,18 +34,22 @@ for %%F in (version hashes list) do (
 
 echo.
 if defined FOUND (
-    echo Done. A copy was kept in _backup\%TS%-uninstalled
+    echo Done. Removed skills are in the Recycle Bin.
     echo Restart Claude Code to apply.
 ) else (
     echo fab skills were not installed. Nothing to remove.
 )
 if /i not "%~1"=="/quiet" pause
-exit /b 0
+exit /b %RC%
 
 :remove
 if not exist "%DEST%\%~1" exit /b 0
 set "FOUND=1"
-if not exist "%BACKUP%" mkdir "%BACKUP%"
-move "%DEST%\%~1" "%BACKUP%\%~1" >nul
-echo   removed %~1
+powershell -NoProfile -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteDirectory('%DEST%\%~1','OnlyErrorDialogs','SendToRecycleBin')"
+if exist "%DEST%\%~1" (
+    echo [ERROR] Could not remove %~1.
+    set "RC=1"
+) else (
+    echo   removed %~1
+)
 exit /b 0

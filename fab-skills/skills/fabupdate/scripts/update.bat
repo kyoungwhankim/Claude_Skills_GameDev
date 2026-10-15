@@ -9,7 +9,7 @@ rem  replaces the installed skills. No local clone is needed.
 rem    - git found : git clone --depth 1   otherwise : GitHub ZIP
 rem    - files in preserve.txt are kept if the user has edited them
 rem      (hash recorded at install/update time); /force replaces them too
-rem    - the previous installed copy goes to <skills>\_backup\<date-time>\
+rem    - no backup is kept: installed skills are replaced in place
 rem  Options: /quiet (no pause at the end), /force
 rem  Advanced: set FAB_FROM=<folder with skills\ and preserve.txt>
 rem            to install from a local copy instead of downloading.
@@ -101,7 +101,6 @@ if not exist "%NEWROOT%skills\fab\SKILL.md" (
 )
 set "NEWVER=unknown"
 if exist "%NEWROOT%VERSION" set /p NEWVER=<"%NEWROOT%VERSION"
-set "BACKUP=%DEST%\_backup\%TS%"
 set "KEEP=%WORK%\keep"
 set "PRESERVE=%NEWROOT%preserve.txt"
 
@@ -125,7 +124,6 @@ copy /y "%NEWROOT%VERSION" "%DEST%\.fab-skills-version" >nul 2>nul
 
 echo.
 echo Done. %OLDVER% -^> %NEWVER%
-echo Previous copy kept in: %BACKUP%
 echo Start a new Claude Code session to use the new version.
 goto :end
 
@@ -160,7 +158,8 @@ if errorlevel 1 (
 exit /b 0
 
 :restore
-rem Put an edited file back. If the new version changed it too, save that copy for comparison.
+rem Put an edited file back. If the new version changed it too, say so
+rem (no copy is kept; compare with the file on GitHub when merging).
 set "REL=%~1"
 set "WREL=%REL:/=\%"
 set "UPCHANGED=1"
@@ -178,10 +177,8 @@ if defined UPCHANGED (
     if not errorlevel 1 set "UPCHANGED="
 )
 if defined UPCHANGED (
-    for %%F in ("%BACKUP%\_new\%WREL%") do if not exist "%%~dpF" mkdir "%%~dpF"
-    copy /y "%DEST%\%WREL%" "%BACKUP%\_new\%WREL%" >nul
     echo   kept your edited %REL%
-    echo     [CHECK] the new version also changed it: _backup\%TS%\_new\%WREL%
+    echo     [CHECK] the new version also changed it: %SUBDIR%/skills/%REL% on GitHub
 ) else (
     echo   kept your edited %REL%
 )
@@ -199,14 +196,6 @@ exit /b 0
 
 :update_one
 set "NAME=%~1"
-if exist "%DEST%\%NAME%" (
-    robocopy "%DEST%\%NAME%" "%BACKUP%\%NAME%" /E /NFL /NDL /NJH /NJS /NP >nul
-    if errorlevel 8 (
-        echo [ERROR] Could not back up %NAME%. It was not updated.
-        set "RC=1"
-        exit /b 1
-    )
-)
 robocopy "%NEWROOT%skills\%NAME%" "%DEST%\%NAME%" /MIR /NFL /NDL /NJH /NJS /NP >nul
 if errorlevel 8 (
     echo [ERROR] Failed to copy %NAME%.
