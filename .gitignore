@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+
+# ue-asset-analysis: analysis workspaces and dump outputs must never be committed.
+# Workspaces belong outside this repository; these rules are a safety net.
+uetk.json
+Dump/
+Docs/
+Analysis/
+Saved/
+Intermediate/
+Binaries/
+DerivedDataCache/
+*.uasset
+*.umap
+*.uproject
+*.graph.txt
+*.props.txt
+*.t3d
+*.niagara.hlsl
+deps.dot
+deps.svg
